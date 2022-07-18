@@ -83,40 +83,27 @@ public class ReaderController {
         }
     }
 
-    // Get detailed output of book.
-    // Responds with Book entity and List of Author enitites and HTTP 200 Code or
-    // with HTTP 404 Code.
-    @GetMapping("/books/{id}/detail")
-    public ResponseEntity<Pair<Book, List<Author>>> getBookDetails(
-            @PathVariable("id") UUID id) {
-        Optional<Book> book = bookRepository.findById(id);
-
-        if (book.isPresent()) {
-            Pair<Book, List<Author>> detail;
-
-            List<Author> authors = new ArrayList<Author>();
-            book.get().getAuthors().forEach(authors::add);
-
-            // Making and returning a pair with Book and List of Authors.
-            detail = Pair.of(book.get(), authors);
-            return new ResponseEntity<>(detail, HttpStatus.OK);
-        } else {
-            return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
-        }
-    }
-
-    // Method to
+    // Download book file.
+    // Responds with file and HTTP 200 Code or with HTTP 404 Code.
     @GetMapping(value = "/books/{id}/download", produces = MediaType.APPLICATION_PDF_VALUE)
     public ResponseEntity<Resource> downloadBook(@PathVariable("id") UUID id) {
         Optional<Book> book = bookRepository.findById(id);
 
+        // Checking for book.
         if (book.isPresent()) {
             String filename = book.get().getFile();
 
+            // Checking for filename in book entity.
             if (filename != null) {
+                // Trying to load file with Storage Service.
+                // Exception may be throwed.
                 Resource file = storageService.load(filename);
+
+                // Createing headers. They tell browser how to work with file.
                 HttpHeaders responseHeader = new HttpHeaders();
-                responseHeader.set(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + file.getFilename() + "\"");
+                responseHeader.set(HttpHeaders.CONTENT_DISPOSITION,
+                        "attachment; filename=\"" + file.getFilename() + "\"");
+
                 return new ResponseEntity<>(file, responseHeader, HttpStatus.OK);
             }
             return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
@@ -124,6 +111,9 @@ public class ReaderController {
         return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
     }
 
+    // Get all authors.
+    // Responds with List of Author entities and HTTP 200 Code or with HTTP 500
+    // Code.
     @GetMapping("/authors")
     public ResponseEntity<List<Author>> getAllAuthors(
             @RequestParam(value = "firstname", required = false) String firstname,
@@ -135,6 +125,19 @@ public class ReaderController {
             List<Author> authors = new ArrayList<>();
             Stream<Author> stream = authorRepository.findAll().stream();
 
+            // Method first finds all authors and then filters them by accepted params.
+            if (firstname != null)
+                stream = stream.filter(a -> a.getFirstname().equals(firstname));
+            if (lastname != null)
+                stream = stream.filter(a -> a.getLastname().equals(lastname));
+            if (middlename != null)
+                stream = stream.filter(a -> a.getMiddlename().equals(middlename));
+            if (birthDate != null)
+                stream = stream.filter(a -> a.getBirthDate().equals(birthDate));
+            if (deathDate != null)
+                stream = stream.filter(a -> a.getDeathDate().equals(deathDate));
+
+            // Convert stream to List to return.
             authors = stream.toList();
 
             return new ResponseEntity<>(authors, HttpStatus.OK);

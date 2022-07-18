@@ -1,9 +1,10 @@
 FROM openjdk:18-alpine
 
-RUN addgroup -S sc && adduser -S sc -G sc
-USER sc:sc
+WORKDIR /app
+COPY . /app
+RUN ./mvnw package -Dmaven.test.skip
 
 ARG JAR_FILE=target/*.jar
 COPY ${JAR_FILE} app.jar
 
-ENTRYPOINT [ "java", "-jar", "/app.jar" ]
+ENTRYPOINT [ "java", "-jar", "/app/app.jar" ]

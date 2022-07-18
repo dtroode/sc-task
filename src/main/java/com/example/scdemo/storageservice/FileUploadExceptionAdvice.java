@@ -11,6 +11,9 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExcep
 @ControllerAdvice
 public class FileUploadExceptionAdvice extends ResponseEntityExceptionHandler {
 
+    // Class helps us to act when exception occurs.
+    // Here we track max file size exceed exception.
+    // File size set in `application.properties`.
     @ExceptionHandler(MaxUploadSizeExceededException.class)
     public ResponseEntity<ResponseMessage> handleMaxSizeException(MaxUploadSizeExceededException exc) {
         return new ResponseEntity<>(new ResponseMessage("File too large."), HttpStatus.EXPECTATION_FAILED);

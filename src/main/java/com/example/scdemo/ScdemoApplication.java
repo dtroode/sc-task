@@ -18,6 +18,7 @@ public class ScdemoApplication implements CommandLineRunner {
 
     @Override
     public void run(String... arg) throws Exception {
+        // Init storage service (create folder) after start of app.
         storageService.init();
     }
 }

@@ -34,7 +34,11 @@ public class Book {
     @Column(name = "file_added")
     private Date fileAdded;
 
+    // Cascade settings tell us to save author entity when saving book entity and
+    // to apply cahnges to author entity when author entity is changed inside book
+    // entity.
     @ManyToMany(fetch = FetchType.LAZY, cascade = { CascadeType.PERSIST, CascadeType.MERGE })
+    // Also settings to override default many-to-many join table.
     @JoinTable(name = "book_has_author", joinColumns = @JoinColumn(name = "book_id"), inverseJoinColumns = @JoinColumn(name = "author_id"))
     private Set<Author> authors = new HashSet<>();
 

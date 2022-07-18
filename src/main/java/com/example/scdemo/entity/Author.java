@@ -28,11 +28,16 @@ public class Author {
     @Column(name = "description")
     private String description;
 
-    @ManyToMany(fetch = FetchType.LAZY,
-            cascade = {
-                    CascadeType.PERSIST,
-                    CascadeType.MERGE
-            }, mappedBy = "authors")
+    // Cascade settings tell us to save book entity when saving author entity and
+    // to apply cahnges to book entity when book entity is changed inside author
+    // entity.
+    // Beacuse of no CascadeType.REMOVE we can't delete author without deleting all
+    // related books.
+    @ManyToMany(fetch = FetchType.LAZY, cascade = {
+            CascadeType.PERSIST,
+            CascadeType.MERGE
+    }, mappedBy = "authors")
+    // This marker set to fix loop in entities tree when building app.
     @JsonIgnore
     private Set<Book> books = new HashSet<>();
 
